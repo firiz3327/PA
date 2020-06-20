@@ -46,12 +46,13 @@ public final class Main {
                 return serverError(languageType, code, e);
             }
         }).get();
-        if(polyglotResult.getError() != null) {
-            System.out.println("error: " + polyglotResult.getError());
-        }
-        System.out.println(polyglotResult.getReturnValue());
-        if (polyglotResult.getLog() != null && !polyglotResult.getLog().isEmpty()) {
-            System.out.println(polyglotResult.getLog());
+        if (polyglotResult.getError() != null && !polyglotResult.getError().isEmpty()) {
+            System.err.println(polyglotResult.getError());
+        } else {
+            System.out.println(polyglotResult.getReturnValue());
+            if (languageType != LanguageType.LLVM) {
+                System.out.println(polyglotResult.getLog());
+            }
         }
     }
 
@@ -60,12 +61,8 @@ public final class Main {
     }
 
     private static PolyglotResult serverError(LanguageType languageType, String code, ExecResult result) {
-//        logger.log(Level.SEVERE, result.getException().toString(), result.getException());
+        result.getException().printStackTrace();
         return new PolyglotResult(languageType, code, result.getLog(), result.getReturnValue(), "server error.");
     }
-
-//    public static Logger getLogger() {
-//        return logger;
-//    }
 
 }
