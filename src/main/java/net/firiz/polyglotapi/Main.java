@@ -83,6 +83,11 @@ public final class Main {
         return new PolyglotResult(languageType, code, result.getLog(), result.getReturnValue(), "server error.");
     }
 
+    /**
+     * まじでinputstreamとoutputstream設定してもllvmだと機能しないのどうにかしてくれgraalvmさんよ、、なんか方法ある？
+     * @param code
+     * @param stdin
+     */
     @Deprecated(forRemoval = true)
     private void lli(String code, String[] stdin) {
         final File llvmFolder = new File("llvmFiles");
