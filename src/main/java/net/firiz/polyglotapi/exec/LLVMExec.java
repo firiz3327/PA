@@ -1,5 +1,6 @@
 package net.firiz.polyglotapi.exec;
 
+import net.firiz.polyglotapi.binding.StdinBindData;
 import net.firiz.polyglotapi.exec.result.ExecResult;
 import net.firiz.polyglotapi.language.LanguageType;
 import org.graalvm.polyglot.Context;
@@ -32,7 +33,7 @@ public class LLVMExec extends Exec {
         }
 
         final Runtime runtime = Runtime.getRuntime();
-        final String clangFile = System.getProperty("java.home") + "/languages/llvm/native/bin/gcc";
+        final String clangFile = System.getProperty("java.home") + "/languages/llvm/native/bin/clang";
         Process clangExec;
         try {
             clangExec = runtime.exec(new String[]{clangFile, llvmFile.getName(), "-o", llvmUUID, "-w"}, null, llvmFolder);
@@ -41,7 +42,8 @@ public class LLVMExec extends Exec {
             return errorResult(e, contextStream);
         }
         final StringJoiner joiner = new StringJoiner("\n");
-        try (final BufferedReader br = new BufferedReader(new InputStreamReader(clangExec.getErrorStream()))) {
+        try (final InputStreamReader sr = new InputStreamReader(clangExec.getErrorStream());
+                final BufferedReader br = new BufferedReader(sr)) {
             String str;
             while ((str = br.readLine()) != null) {
                 joiner.add(str);
