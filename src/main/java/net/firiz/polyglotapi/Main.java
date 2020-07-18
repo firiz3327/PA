@@ -132,13 +132,13 @@ public final class Main {
             process = pb.start();
             ist.setInputStream(process.getInputStream());
             est.setInputStream(process.getErrorStream());
+            ist.start();
+            est.start();
             final OutputStreamWriter writer = new OutputStreamWriter(process.getOutputStream());
             for(final String str : stdin) {
                 writer.append(str).append("\n");
             }
             writer.flush();
-            ist.start();
-            est.start();
             process.waitFor();
             ist.join();
             est.join();
