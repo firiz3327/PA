@@ -1,5 +1,6 @@
 package net.firiz.polyglotapi;
 
+import com.google.gson.annotations.Expose;
 import net.firiz.polyglotapi.language.LanguageType;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
@@ -10,8 +11,10 @@ public class PolyglotResult {
     private final LanguageType language;
     @Nullable
     private final String code;
+    @Expose
     @NotNull
     private final String log;
+    @Expose
     @Nullable
     private final String returnValue;
     @Nullable

@@ -11,6 +11,13 @@ public class ISThread extends Thread {
 
     private BufferedReader br;
 
+    public ISThread() {
+    }
+
+    public ISThread(InputStream inputStream) {
+        setInputStream(inputStream);
+    }
+
     public void setInputStream(InputStream inputStream) {
         br = new BufferedReader(new InputStreamReader(inputStream));
     }

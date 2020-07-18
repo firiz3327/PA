@@ -10,7 +10,7 @@ import java.nio.charset.StandardCharsets;
 
 public abstract class Exec {
 
-    abstract public ExecResult exec(@NotNull final LanguageType languageType, @NotNull final String code, @NotNull final Context context, @NotNull final ByteArrayOutputStream contextStream);
+    abstract public ExecResult exec(@NotNull final LanguageType languageType, @NotNull final String code, @NotNull String[] bindData, @NotNull final Context context, @NotNull final ByteArrayOutputStream contextStream);
 
     protected final ExecResult errorResult(Exception e, ByteArrayOutputStream contextStream) {
         return new ExecResult(e, contextStream.toString(StandardCharsets.UTF_8), null, e.getLocalizedMessage());

@@ -10,7 +10,7 @@ import java.io.ByteArrayOutputStream;
 public class NotSupportExec extends Exec {
 
     @Override
-    public ExecResult exec(@NotNull LanguageType languageType, @NotNull String code, @NotNull Context context, @NotNull ByteArrayOutputStream contextStream) {
+    public ExecResult exec(@NotNull LanguageType languageType, @NotNull String code, @NotNull String[] bindData, @NotNull Context context, @NotNull ByteArrayOutputStream contextStream) {
         throw new UnsupportedOperationException("not support language type.");
     }
 

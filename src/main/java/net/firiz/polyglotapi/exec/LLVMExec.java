@@ -1,6 +1,5 @@
 package net.firiz.polyglotapi.exec;
 
-import net.firiz.polyglotapi.binding.StdinBindData;
 import net.firiz.polyglotapi.exec.result.ExecResult;
 import net.firiz.polyglotapi.language.LanguageType;
 import org.graalvm.polyglot.Context;
@@ -21,7 +20,7 @@ public class LLVMExec extends Exec {
         llvmFolder = new File("llvmFiles");
     }
 
-    public ExecResult exec(@NotNull final LanguageType languageType, @NotNull final String code, @NotNull final Context context, @NotNull final ByteArrayOutputStream contextStream) {
+    public ExecResult exec(@NotNull final LanguageType languageType, @NotNull final String code, @NotNull String[] bindData, @NotNull final Context context, @NotNull final ByteArrayOutputStream contextStream) {
         final String llvmUUID = UUID.randomUUID().toString();
         final File llvmFile = new File(llvmFolder, llvmUUID + ".c");
         try (final FileOutputStream fos = new FileOutputStream(llvmFile);
@@ -52,7 +51,7 @@ public class LLVMExec extends Exec {
             return errorResult(e, contextStream);
         }
         if (joiner.length() != 0) {
-            return new ExecResult(null, null, null, joiner.toString());
+            return new ExecResult(null, "", null, joiner.toString());
         }
         Value value = null;
         String error = null;
