@@ -11,10 +11,14 @@ import org.jetbrains.annotations.NotNull;
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
 
-public class ScriptExec extends Exec {
+public class ScriptExec extends ContextExec {
+
+    public ScriptExec(@NotNull LanguageType languageType) {
+        super(languageType);
+    }
 
     @Override
-    public ExecResult exec(@NotNull LanguageType languageType, @NotNull String code, @NotNull String[] bindData, @NotNull Context context, @NotNull ByteArrayOutputStream contextStream) {
+    public ExecResult exec(@NotNull String code, @NotNull String[] bindData, @NotNull Context context, @NotNull ByteArrayOutputStream contextStream) {
         String result = null;
         String error = null;
         final Value global = context.getBindings(languageType.getName());

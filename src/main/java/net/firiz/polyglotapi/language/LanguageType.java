@@ -1,41 +1,50 @@
 package net.firiz.polyglotapi.language;
 
 import net.firiz.polyglotapi.APIConstants;
-import net.firiz.polyglotapi.exec.Exec;
-import net.firiz.polyglotapi.exec.LLVMExec;
-import net.firiz.polyglotapi.exec.NotSupportExec;
-import net.firiz.polyglotapi.exec.ScriptExec;
+import net.firiz.polyglotapi.exec.*;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-import java.io.IOException;
 import java.util.Arrays;
 import java.util.List;
 
 public enum LanguageType {
     UNKNOWN(new NotSupportExec(), "unknown", ""),
-    JS(new ScriptExec(), "js", "javascript"), // initial
-    PYTHON(new ScriptExec(), "python", "py"), // graalpython
+    JS("js", "javascript"), // initial
+    PYTHON("python", "py"), // graalpython
     RUBY(new NotSupportExec(), "ruby"), // truffleruby 実行未確認
     R(new NotSupportExec(), "R", "r"), // fastr 実行未確認
-    LLVM(new LLVMExec(), "llvm", "c", "c++", "cpp"); // llvm
+    LLVM(new LLVMExec(), "llvm", "c", "c++", "cpp"), // llvm
+    JAVA(new JavaExec(), true, "java") // javassist
+    ;
 
     // 実際の実行環境のインストールは下記参照
     // https://www.graalvm.org/docs/getting-started/
 
     @NotNull
-    private final Exec exec;
+    private final IExec exec;
     @NotNull
     private final String name;
     @NotNull
     private final List<String> alias;
     private final boolean supported;
 
-    LanguageType(@NotNull final Exec exec, final String... alias) {
-        this.exec = exec;
+    LanguageType(@NotNull final IExec exec, final String... alias) {
+        this(exec, APIConstants.INSTALLED_LANGUAGES.contains(alias[0]), alias);
+    }
+
+    LanguageType(final String... alias) {
+        this.exec = new ScriptExec(this);
         this.name = alias[0];
         this.alias = Arrays.asList(alias);
         this.supported = APIConstants.INSTALLED_LANGUAGES.contains(name);
+    }
+
+    LanguageType(@NotNull final IExec exec, boolean supported, final String... alias) {
+        this.exec = exec;
+        this.name = alias[0];
+        this.alias = Arrays.asList(alias);
+        this.supported = supported;
     }
 
     @NotNull
@@ -47,7 +56,7 @@ public enum LanguageType {
     }
 
     @NotNull
-    public Exec getExec() {
+    public IExec getExec() {
         return exec;
     }
 
