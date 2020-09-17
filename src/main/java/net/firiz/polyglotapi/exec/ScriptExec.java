@@ -4,9 +4,11 @@ import net.firiz.polyglotapi.APIConstants;
 import net.firiz.polyglotapi.binding.ScriptBindData;
 import net.firiz.polyglotapi.exec.result.ExecResult;
 import net.firiz.polyglotapi.language.LanguageType;
+import net.firiz.polyglotapi.project.Project;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -18,11 +20,11 @@ public class ScriptExec extends ContextExec {
     }
 
     @Override
-    public ExecResult exec(@NotNull String code, @NotNull String[] bindData, @NotNull Context context, @NotNull ByteArrayOutputStream contextStream) {
+    public ExecResult exec(@NotNull String code, @NotNull String[] bindData, @NotNull Context context, @NotNull ByteArrayOutputStream contextStream, @Nullable Project project) {
         String result = null;
         String error = null;
         final Value global = context.getBindings(languageType.getName());
-        final ScriptBindData scriptBindData = new ScriptBindData(bindData);
+        final ScriptBindData scriptBindData = new ScriptBindData(project, bindData);
         global.putMember(APIConstants.BIND_MEMBER, scriptBindData);
         try {
             final Value value = context.eval(languageType.getName(), code);

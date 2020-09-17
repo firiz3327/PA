@@ -3,8 +3,10 @@ package net.firiz.polyglotapi.exec;
 import net.firiz.polyglotapi.exec.result.ExecResult;
 import net.firiz.polyglotapi.json.PolyglotResult;
 import net.firiz.polyglotapi.language.LanguageType;
+import net.firiz.polyglotapi.project.Project;
 import org.graalvm.polyglot.Context;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -21,7 +23,7 @@ public abstract class ContextExec implements IExec {
         this.languageType = languageType;
     }
 
-    public PolyglotResult exec(@NotNull String code, @NotNull String[] bindData) {
+    public PolyglotResult exec(@NotNull String code, @NotNull String[] bindData, @Nullable Project project) {
         try (final ByteArrayOutputStream contextStream = new ByteArrayOutputStream();
              final InputStream stdinStream = new ByteArrayInputStream(String.join(System.lineSeparator(), Arrays.asList(bindData)).getBytes(StandardCharsets.UTF_8))) {
             final String returnValue;
@@ -36,7 +38,8 @@ public abstract class ContextExec implements IExec {
                         code,
                         bindData,
                         context,
-                        contextStream
+                        contextStream,
+                        project
                 );
                 if (result.isException()) {
                     return PolyglotResult.serverError(languageType, code, result);
@@ -53,7 +56,7 @@ public abstract class ContextExec implements IExec {
         }
     }
 
-    abstract protected ExecResult exec(@NotNull final String code, @NotNull String[] bindData, @NotNull final Context context, @NotNull final ByteArrayOutputStream contextStream);
+    abstract ExecResult exec(@NotNull final String code, @NotNull String[] bindData, @NotNull final Context context, @NotNull final ByteArrayOutputStream contextStream, @Nullable Project project);
 
     protected final ExecResult errorResult(Exception e, ByteArrayOutputStream contextStream) {
         return new ExecResult(e, contextStream.toString(StandardCharsets.UTF_8), null, e.getLocalizedMessage());

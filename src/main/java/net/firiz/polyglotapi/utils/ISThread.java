@@ -1,4 +1,4 @@
-package net.firiz.polyglotapi;
+package net.firiz.polyglotapi.utils;
 
 import java.io.*;
 import java.util.ArrayList;

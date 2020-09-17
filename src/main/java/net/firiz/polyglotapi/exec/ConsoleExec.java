@@ -1,7 +1,7 @@
 package net.firiz.polyglotapi.exec;
 
-import net.firiz.polyglotapi.EConsumer;
-import net.firiz.polyglotapi.ISThread;
+import net.firiz.polyglotapi.utils.EConsumer;
+import net.firiz.polyglotapi.utils.ISThread;
 
 import java.io.File;
 import java.io.IOException;

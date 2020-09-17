@@ -1,30 +1,27 @@
 package net.firiz.polyglotapi.exec;
 
-import javassist.*;
-import javassist.bytecode.ClassFile;
 import net.firiz.polyglotapi.APIConstants;
 import net.firiz.polyglotapi.json.PolyglotResult;
 import net.firiz.polyglotapi.language.LanguageType;
+import net.firiz.polyglotapi.project.Project;
+import net.firiz.polyglotapi.utils.ISThread;
 import org.jetbrains.annotations.NotNull;
+import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Method;
 import java.nio.charset.StandardCharsets;
 import java.util.Arrays;
 import java.util.StringJoiner;
-import java.util.UUID;
+import java.util.stream.Stream;
 
 public class JavaExec extends ConsoleExec {
 
     @Override
-    public PolyglotResult exec(@NotNull String code, @NotNull String[] bindData) {
-        final String uuid = UUID.randomUUID().toString();
-        final File uuidFolder = new File(APIConstants.JAVA_FOLDER, uuid);
-        if (!uuidFolder.mkdir()) {
-            return new PolyglotResult(LanguageType.JAVA, code, "", null, "duplicated uuid.");
+    public PolyglotResult exec(@NotNull String code, @NotNull String[] bindData, @Nullable Project project) {
+        if (project == null) {
+            return new PolyglotResult(LanguageType.JAVA, code, "", null, "project is null.");
         }
-        final File javaFile = new File(uuidFolder, "Main.java");
+        final File javaFile = new File(project.getFolder(), "Main.java");
         try (final FileOutputStream fos = new FileOutputStream(javaFile);
              final PrintWriter printWriter = new PrintWriter(fos, true, StandardCharsets.UTF_8)
         ) {
@@ -34,7 +31,7 @@ public class JavaExec extends ConsoleExec {
         }
 
         final ConsoleResult buildResult = process(
-                uuidFolder,
+                project.getFolder(),
                 APIConstants.CONSOLE_COMPILE_TIME,
                 "javac", javaFile.getName()
         );
@@ -51,46 +48,32 @@ public class JavaExec extends ConsoleExec {
             return new PolyglotResult(LanguageType.JAVA, code, "", null, errorJoiner.toString());
         }
 
-        final ClassPool classPool = ClassPool.getDefault();
-        try {
-            final ClassFile classFile = new ClassFile(new DataInputStream(new FileInputStream(new File(uuidFolder, "Main.class"))));
-            final CtClass ctClass = classPool.makeClass(classFile);
-            final Class<?> aClass = ctClass.toClass();
-            final Method main = aClass.getDeclaredMethod("main", String[].class);
-            main.setAccessible(true);
-
-            final String log;
-            final String errLog;
-            final InputStream defaultIN = System.in;
-            final PrintStream defaultERR = System.err;
-            final PrintStream defaultOUT = System.out;
-            try (final ByteArrayOutputStream byteOut = new ByteArrayOutputStream();
-                 final PrintStream out = new PrintStream(byteOut, true);
-                 final ByteArrayOutputStream byteErr = new ByteArrayOutputStream();
-                 final PrintStream err = new PrintStream(byteErr, true);
-                 final InputStream stdinStream = new ByteArrayInputStream(String.join(System.lineSeparator(), Arrays.asList(bindData)).getBytes(StandardCharsets.UTF_8))
-            ) {
-                System.setIn(stdinStream);
-                System.setOut(out);
-                System.setErr(err);
-                main.invoke(null, (Object) bindData);
-                log = byteOut.toString(StandardCharsets.UTF_8);
-                errLog = byteErr.toString(StandardCharsets.UTF_8);
-            }
-            System.setIn(defaultIN);
-            System.setOut(defaultOUT);
-            System.setErr(defaultERR);
-            final boolean isError = !errLog.isEmpty();
-            return new PolyglotResult(
-                    LanguageType.JAVA,
-                    code,
-                    isError ? "" : log,
-                    "0",
-                    isError ? errLog : null
-            );
-        } catch (IOException | CannotCompileException | NoSuchMethodException | IllegalAccessException | InvocationTargetException e) {
-            return new PolyglotResult(LanguageType.JAVA, code, "", null, e.getLocalizedMessage());
+        final ConsoleResult runResult = process(
+                project.getFolder(),
+                APIConstants.CONSOLE_RUN_TIME,
+                process -> {
+                    final OutputStreamWriter writer = new OutputStreamWriter(process.getOutputStream());
+                    for (final String str : bindData) {
+                        writer.append(str).append("\n");
+                    }
+                    writer.flush();
+                },
+                Stream.concat(Arrays.stream(new String[]{"java", "Main"}), Arrays.stream(bindData)).toArray(String[]::new)
+        );
+        if (runResult.hasException()) {
+            return PolyglotResult.serverError(LanguageType.JAVA, code, runResult.getException());
         }
+        final ISThread est = runResult.getEst();
+        final StringJoiner resultJoiner = new StringJoiner("\n");
+        final boolean isError = !est.getStringList().isEmpty();
+        (isError ? est.getStringList() : runResult.getIst().getStringList()).forEach(resultJoiner::add);
+        return new PolyglotResult(
+                LanguageType.JAVA,
+                code,
+                isError ? "" : resultJoiner.toString(),
+                String.valueOf(runResult.getExitValue()),
+                isError ? resultJoiner.toString() : null
+        );
     }
 
 }

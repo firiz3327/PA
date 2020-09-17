@@ -1,14 +1,13 @@
 package net.firiz.polyglotapi;
 
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
+import net.firiz.polyglotapi.json.JsonArgs;
 import net.firiz.polyglotapi.json.PolyglotResult;
+import net.firiz.polyglotapi.json.adapter.JsonFactory;
 import net.firiz.polyglotapi.language.LanguageType;
+import net.firiz.polyglotapi.project.Project;
 
-import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
-import java.util.Base64;
-
+import java.io.IOException;
+import java.util.UUID;
 import java.util.function.Supplier;
 
 public final class Main {
@@ -16,8 +15,6 @@ public final class Main {
     public static void main(String[] args) {
         new Main().start(args);
     }
-
-    private final Gson gson = new GsonBuilder().excludeFieldsWithoutExposeAnnotation().create();
 
     /**
      * 渡されたコードを実行し結果を標準出力へ書き込みます<br>
@@ -30,19 +27,35 @@ public final class Main {
      * @param args プログラム実行時の引数
      */
     private void start(String[] args) {
-        final LanguageType languageType = LanguageType.search(args[0]);
-        final String code = new String(Base64.getDecoder().decode(args[1].getBytes()), StandardCharsets.UTF_8);
-        final String[] stdin = args.length >= 3 ? Arrays.copyOfRange(args, 2, args.length) : new String[0];
+        final JsonArgs json = JsonFactory.fromJson(args[0], JsonArgs.class);
+        json.init();
+//        final LanguageType languageType = LanguageType.search(args[0]);
+//        final String code = new String(Base64.getDecoder().decode(args[1].getBytes()), StandardCharsets.UTF_8);
+//        final String[] stdin = args.length >= 3 ? Arrays.copyOfRange(args, 2, args.length) : new String[0];
+        final LanguageType languageType = json.getLanguageType();
+        final Project project;
+        if (json.getLanguageType().isAutoProject() || json.isAutoProject()) {
+            final UUID uuid = UUID.randomUUID();
+            project = new Project(uuid, json.getFileName(), json.getFile64());
+            try {
+                project.init();
+            } catch (IOException e) {
+                System.err.println(e.getLocalizedMessage());
+                return;
+            }
+        } else {
+            project = null;
+        }
         final PolyglotResult polyglotResult = ((Supplier<PolyglotResult>) () -> {
             if (!languageType.isSupported()) {
-                return new PolyglotResult(languageType, code, "", null, "'" + languageType.getName() + "' language is not supported.");
+                return new PolyglotResult(languageType, json.getCode(), "", null, "'" + languageType.getName() + "' language is not supported.");
             }
-            return languageType.getExec().exec(code, stdin);
+            return languageType.getExec().exec(json.getCode(), json.getStdin(), project);
         }).get();
         if (polyglotResult.isError()) {
             System.err.println(polyglotResult.getErrorMsg());
         } else {
-            System.out.println(gson.toJson(polyglotResult));
+            System.out.println(JsonFactory.toJson(polyglotResult));
         }
     }
 }

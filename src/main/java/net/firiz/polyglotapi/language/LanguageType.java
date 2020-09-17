@@ -9,13 +9,13 @@ import java.util.Arrays;
 import java.util.List;
 
 public enum LanguageType {
-    UNKNOWN(new NotSupportExec(), "unknown", ""),
+    UNKNOWN(new NotSupportExec(), false, "unknown", ""),
     JS("js", "javascript"), // initial
     PYTHON("python", "py"), // graalpython
-    RUBY(new NotSupportExec(), "ruby"), // truffleruby 実行未確認
-    R(new NotSupportExec(), "R", "r"), // fastr 実行未確認
-    LLVM(new LLVMExec(), "llvm", "c", "c++", "cpp"), // llvm
-    JAVA(new JavaExec(), true, "java") // javassist
+    RUBY(new NotSupportExec(), false, "ruby"), // truffleruby 実行未確認
+    R(new NotSupportExec(), false, "R", "r"), // fastr 実行未確認
+    LLVM(new LLVMExec(), true, "llvm", "c", "c++", "cpp"), // llvm
+    JAVA(new JavaExec(), true, true, "java") // javassist
     ;
 
     // 実際の実行環境のインストールは下記参照
@@ -28,9 +28,10 @@ public enum LanguageType {
     @NotNull
     private final List<String> alias;
     private final boolean supported;
+    private final boolean autoProject;
 
-    LanguageType(@NotNull final IExec exec, final String... alias) {
-        this(exec, APIConstants.INSTALLED_LANGUAGES.contains(alias[0]), alias);
+    LanguageType(@NotNull final IExec exec, boolean autoProject, final String... alias) {
+        this(exec, APIConstants.INSTALLED_LANGUAGES.contains(alias[0]), autoProject, alias);
     }
 
     LanguageType(final String... alias) {
@@ -38,13 +39,15 @@ public enum LanguageType {
         this.name = alias[0];
         this.alias = Arrays.asList(alias);
         this.supported = APIConstants.INSTALLED_LANGUAGES.contains(name);
+        this.autoProject = false;
     }
 
-    LanguageType(@NotNull final IExec exec, boolean supported, final String... alias) {
+    LanguageType(@NotNull final IExec exec, boolean supported, boolean autoProject, final String... alias) {
         this.exec = exec;
         this.name = alias[0];
         this.alias = Arrays.asList(alias);
         this.supported = supported;
+        this.autoProject = autoProject;
     }
 
     @NotNull
@@ -69,4 +72,7 @@ public enum LanguageType {
         return supported;
     }
 
+    public boolean isAutoProject() {
+        return autoProject;
+    }
 }

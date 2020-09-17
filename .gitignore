@@ -72,5 +72,5 @@ fabric.properties
 
 # Custom
 target/
-llvmFiles/
+projects/
 .idea/sonarlint
