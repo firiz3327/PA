@@ -1,11 +1,10 @@
 package net.firiz.polyglotapi.language;
 
-import junit.framework.TestCase;
 import net.firiz.polyglotapi.APIConstants;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.Test;
 
-class LanguageTypeTest extends TestCase {
+public class LanguageTypeTest {
 
     @Test
     void search() {

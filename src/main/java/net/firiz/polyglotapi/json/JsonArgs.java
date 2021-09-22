@@ -26,15 +26,18 @@ public class JsonArgs {
     @Expose
     @Nullable
     private final String file64;
+    @Expose
+    private final boolean ppapSwing;
 
     private String code;
 
-    public JsonArgs(@NotNull LanguageType languageType, @NotNull String code64, @NotNull String[] stdin, @Nullable String fileName, @Nullable String file64) {
+    public JsonArgs(@NotNull LanguageType languageType, @NotNull String code64, @NotNull String[] stdin, @Nullable String fileName, @Nullable String file64, boolean ppapSwing) {
         this.languageType = languageType;
         this.code64 = code64;
         this.stdin = stdin;
         this.fileName = fileName;
         this.file64 = file64;
+        this.ppapSwing = ppapSwing;
     }
 
     public void init() {
@@ -71,5 +74,9 @@ public class JsonArgs {
 
     public boolean isAutoProject() {
         return getFileName() != null;
+    }
+
+    public boolean isPPAPSwing() {
+        return ppapSwing;
     }
 }

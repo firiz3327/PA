@@ -1,19 +1,12 @@
 package net.firiz.polyglotapi.exec;
 
-import net.firiz.polyglotapi.APIConstants;
 import net.firiz.polyglotapi.exec.result.ExecResult;
 import net.firiz.polyglotapi.language.LanguageType;
 import net.firiz.polyglotapi.project.Project;
 import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.Source;
-import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.*;
-import java.nio.charset.StandardCharsets;
-import java.util.StringJoiner;
-import java.util.UUID;
 
 @Deprecated(forRemoval = true)
 public class OldLLVMExec extends ContextExec {
@@ -22,7 +15,7 @@ public class OldLLVMExec extends ContextExec {
         super(LanguageType.LLVM);
     }
 
-    public @NotNull ExecResult exec(@NotNull final String code, @NotNull String[] bindData, @NotNull final Context context, @NotNull final ByteArrayOutputStream contextStream, @Nullable Project project) {
+    public @NotNull ExecResult exec(@NotNull final String code, @NotNull String[] bindData, @NotNull final Context context, @NotNull final ByteArrayOutputStream contextStream, @NotNull Project project) {
         /*
         final String llvmUUID = UUID.randomUUID().toString();
         final File llvmFile = new File(APIConstants.LLVM_FOLDER, llvmUUID + ".c");

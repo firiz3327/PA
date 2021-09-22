@@ -6,7 +6,6 @@ import net.firiz.polyglotapi.language.LanguageType;
 import net.firiz.polyglotapi.project.Project;
 import org.graalvm.polyglot.Context;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -24,7 +23,7 @@ public abstract class ContextExec implements IExec {
         this.languageType = languageType;
     }
 
-    public final @NotNull PolyglotResult exec(@NotNull String code, @NotNull String[] bindData, @Nullable Project project) {
+    public final @NotNull PolyglotResult exec(@NotNull String code, @NotNull String[] bindData, @NotNull Project project) {
         try (final ByteArrayOutputStream contextStream = new ByteArrayOutputStream();
              final InputStream stdinStream = new ByteArrayInputStream(String.join(System.lineSeparator(), Arrays.asList(bindData)).getBytes(StandardCharsets.UTF_8))) {
             final String returnValue;
@@ -58,12 +57,16 @@ public abstract class ContextExec implements IExec {
             } catch (Exception e) {
                 return PolyglotResult.serverError(languageType, code, e);
             }
-            return new PolyglotResult(languageType, code, contextStream.toString(StandardCharsets.UTF_8), returnValue, error);
+            final String log = contextStream.toString(StandardCharsets.UTF_8);
+            if (project.isPPAPSwing()) {
+                System.out.println(log);
+            }
+            return new PolyglotResult(languageType, code, log, returnValue, error);
         } catch (IOException e) {
             return PolyglotResult.serverError(languageType, code, e);
         }
     }
 
-    abstract Object exec(@NotNull final String code, @NotNull String[] bindData, @NotNull final Context context, @NotNull final ByteArrayOutputStream contextStream, @Nullable Project project);
+    abstract Object exec(@NotNull final String code, @NotNull String[] bindData, @NotNull final Context context, @NotNull final ByteArrayOutputStream contextStream, @NotNull Project project);
 
 }

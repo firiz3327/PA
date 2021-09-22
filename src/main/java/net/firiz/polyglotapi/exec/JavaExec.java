@@ -6,9 +6,8 @@ import net.firiz.polyglotapi.language.LanguageType;
 import net.firiz.polyglotapi.project.Project;
 import net.firiz.polyglotapi.utils.ISThread;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
-import java.io.*;
+import java.io.OutputStreamWriter;
 import java.util.Arrays;
 import java.util.StringJoiner;
 import java.util.stream.Stream;
@@ -17,14 +16,11 @@ import java.util.stream.Stream;
 public class JavaExec implements IExec, ConsoleRunner {
 
     @Override
-    public @NotNull PolyglotResult exec(@NotNull String code, @NotNull String[] bindData, @Nullable Project project) {
+    public @NotNull PolyglotResult exec(@NotNull String code, @NotNull String[] bindData, @NotNull Project project) {
         final PolyglotResult buildResult = build(LanguageType.JAVA, project, code, "Main.java", new String[]{
-                "javac", "Main.java"
+                project.isPPAPSwing() ? "../../libs/graalvm/bin/javac" : "javac", "Main.java"
         });
         if (buildResult == null) {
-            if (project == null) {
-                throw new AssertionError();
-            }
             final ConsoleResult runResult = process(
                     project.getFolder(),
                     APIConstants.CONSOLE_RUN_TIME,
@@ -35,9 +31,14 @@ public class JavaExec implements IExec, ConsoleRunner {
                         }
                         writer.flush();
                     },
-                    Stream.concat(Arrays.stream(new String[]{"java", "Main"}), Arrays.stream(bindData)).toArray(String[]::new)
+                    Stream.concat(Arrays.stream(new String[]{
+                            project.isPPAPSwing() ? "../../libs/graalvm/bin/java" : "java",
+                            "Main"
+                    }), Arrays.stream(bindData)).toArray(String[]::new)
             );
-            if (runResult.hasException()) {
+            if (project.isPPAPSwing()) {
+                runResult.getGlobalQueue().forEach(System.out::println);
+            } else if (runResult.hasException()) {
                 return PolyglotResult.serverError(LanguageType.JAVA, code, runResult.getException());
             }
             final ISThread est = runResult.getEst();
@@ -54,5 +55,4 @@ public class JavaExec implements IExec, ConsoleRunner {
         }
         return buildResult;
     }
-
 }

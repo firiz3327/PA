@@ -8,7 +8,6 @@ import net.firiz.polyglotapi.project.Project;
 import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.nio.charset.StandardCharsets;
@@ -20,7 +19,7 @@ public class ScriptExec extends ContextExec {
     }
 
     @Override
-    public @NotNull ExecResult exec(@NotNull String code, @NotNull String[] bindData, @NotNull Context context, @NotNull ByteArrayOutputStream contextStream, @Nullable Project project) {
+    public @NotNull ExecResult exec(@NotNull String code, @NotNull String[] bindData, @NotNull Context context, @NotNull ByteArrayOutputStream contextStream, @NotNull Project project) {
         String result = null;
         String error = null;
         final Value global = context.getBindings(languageType.getName());

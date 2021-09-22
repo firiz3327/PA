@@ -8,7 +8,6 @@ import org.graalvm.polyglot.Context;
 import org.graalvm.polyglot.Source;
 import org.graalvm.polyglot.Value;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -22,7 +21,7 @@ public class JavaEspressoExec extends ContextExec implements ConsoleRunner {
     }
 
     @Override
-    Object exec(@NotNull String code, @NotNull String[] bindData, @NotNull Context context, @NotNull ByteArrayOutputStream contextStream, @Nullable Project project) {
+    Object exec(@NotNull String code, @NotNull String[] bindData, @NotNull Context context, @NotNull ByteArrayOutputStream contextStream, @NotNull Project project) {
         final PolyglotResult buildResult = build(LanguageType.JAVA, project, code, "Main.java", new String[]{
                 "javac", "Main.java"
         });

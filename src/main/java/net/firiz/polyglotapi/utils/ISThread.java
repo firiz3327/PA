@@ -1,21 +1,22 @@
 package net.firiz.polyglotapi.utils;
 
+import org.jetbrains.annotations.Nullable;
+
 import java.io.*;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Queue;
 
 public class ISThread extends Thread {
 
     private final List<String> list = new ArrayList<>();
+    private final Queue<String> queue;
 
     private BufferedReader br;
 
-    public ISThread() {
-    }
-
-    public ISThread(InputStream inputStream) {
-        setInputStream(inputStream);
+    public ISThread(@Nullable Queue<String> queue) {
+        this.queue = queue;
     }
 
     public void setInputStream(InputStream inputStream) {
@@ -36,6 +37,7 @@ public class ISThread extends Thread {
             for (; ; ) {
                 String line = br.readLine();
                 if (line == null) break;
+                queue.add(line);
                 list.add(line);
             }
         } catch (IOException e) {

@@ -18,12 +18,14 @@ public class Project {
     private final String fileName;
     @Nullable
     private final String file64;
+    private final boolean isPPAPSwing;
 
-    public Project(@NotNull UUID uuid, @Nullable String fileName, @Nullable String file64) {
+    public Project(@NotNull UUID uuid, @Nullable String fileName, @Nullable String file64, boolean isPPAPSwing) {
         this.uuid = uuid;
         this.folder = new File(APIConstants.PROJECT_FOLDER, uuid.toString());
         this.fileName = fileName;
         this.file64 = file64;
+        this.isPPAPSwing = isPPAPSwing;
     }
 
     public void init() throws IOException {
@@ -44,5 +46,9 @@ public class Project {
     @NotNull
     public File getFolder() {
         return folder;
+    }
+
+    public boolean isPPAPSwing() {
+        return isPPAPSwing;
     }
 }

@@ -14,8 +14,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.charset.StandardCharsets;
-import java.util.Arrays;
+import java.util.Queue;
 import java.util.StringJoiner;
+import java.util.concurrent.ConcurrentLinkedQueue;
 import java.util.concurrent.TimeUnit;
 
 interface ConsoleRunner {
@@ -32,8 +33,9 @@ interface ConsoleRunner {
         } catch (IOException e) {
             return new ConsoleResult(e, true);
         }
-        final ISThread ist = new ISThread();
-        final ISThread est = new ISThread();
+        final Queue<String> globalQueue = new ConcurrentLinkedQueue<>();
+        final ISThread ist = new ISThread(globalQueue);
+        final ISThread est = new ISThread(globalQueue);
         final int exitValue;
         try {
             ist.setInputStream(process.getInputStream());
@@ -51,7 +53,7 @@ interface ConsoleRunner {
         } finally {
             aliveDestroy(process);
         }
-        return new ConsoleResult(ist, est, exitValue);
+        return new ConsoleResult(ist, est, globalQueue, exitValue);
     }
 
     default void aliveDestroy(Process process) {
@@ -99,13 +101,15 @@ interface ConsoleRunner {
     class ConsoleResult {
         private final ISThread ist;
         private final ISThread est;
+        private final Queue<String> globalQueue;
         private final int exitValue;
         private final Exception e;
         private final boolean createProcessError;
 
-        private ConsoleResult(ISThread ist, ISThread est, int exitValue) {
+        private ConsoleResult(ISThread ist, ISThread est, Queue<String> globalQueue, int exitValue) {
             this.ist = ist;
             this.est = est;
+            this.globalQueue = globalQueue;
             this.exitValue = exitValue;
             this.e = null;
             this.createProcessError = false;
@@ -114,6 +118,7 @@ interface ConsoleRunner {
         private ConsoleResult(Exception e, boolean createProcessError) {
             this.ist = null;
             this.est = null;
+            this.globalQueue = null;
             this.exitValue = 1;
             this.e = e;
             this.createProcessError = createProcessError;
@@ -137,6 +142,10 @@ interface ConsoleRunner {
 
         public ISThread getEst() {
             return est;
+        }
+
+        public Queue<String> getGlobalQueue() {
+            return globalQueue;
         }
 
         public int getExitValue() {

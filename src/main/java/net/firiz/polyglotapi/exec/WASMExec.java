@@ -1,21 +1,12 @@
 package net.firiz.polyglotapi.exec;
 
-import net.firiz.polyglotapi.exec.result.ExecResult;
 import net.firiz.polyglotapi.json.PolyglotResult;
 import net.firiz.polyglotapi.language.LanguageType;
 import net.firiz.polyglotapi.project.Project;
-import org.apache.commons.io.FileUtils;
 import org.graalvm.polyglot.Context;
-import org.graalvm.polyglot.Source;
-import org.graalvm.polyglot.Value;
-import org.graalvm.polyglot.io.ByteSequence;
 import org.jetbrains.annotations.NotNull;
-import org.jetbrains.annotations.Nullable;
 
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 
 // require Emscripten
 // https://emscripten.org/docs/tools_reference/emcc.html
@@ -28,7 +19,7 @@ public class WASMExec extends ContextExec implements ConsoleRunner {
     }
 
     @Override
-    public @NotNull Object exec(@NotNull String code, @NotNull String[] bindData, @NotNull Context context, @NotNull ByteArrayOutputStream contextStream, @Nullable Project project) {
+    public @NotNull Object exec(@NotNull String code, @NotNull String[] bindData, @NotNull Context context, @NotNull ByteArrayOutputStream contextStream, @NotNull Project project) {
 //        if (project == null) {
             return new PolyglotResult(LanguageType.WASM, code, "", null, "project is null.");
 //        } else {
