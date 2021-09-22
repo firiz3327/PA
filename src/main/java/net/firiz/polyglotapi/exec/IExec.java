@@ -7,6 +7,7 @@ import org.jetbrains.annotations.Nullable;
 
 public interface IExec {
 
+    @NotNull
     PolyglotResult exec(@NotNull final String code, @NotNull String[] bindData, @Nullable Project project);
 
 }

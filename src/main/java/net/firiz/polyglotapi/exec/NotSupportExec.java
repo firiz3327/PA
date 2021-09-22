@@ -5,10 +5,10 @@ import net.firiz.polyglotapi.project.Project;
 import org.jetbrains.annotations.NotNull;
 import org.jetbrains.annotations.Nullable;
 
-public class NotSupportExec extends Exec {
+public class NotSupportExec implements IExec {
 
     @Override
-    public PolyglotResult exec(@NotNull String code, @NotNull String[] bindData, @Nullable Project project) {
+    public @NotNull PolyglotResult exec(@NotNull String code, @NotNull String[] bindData, @Nullable Project project) {
         throw new UnsupportedOperationException("not support language type.");
     }
 

@@ -7,15 +7,18 @@ import org.jetbrains.annotations.Nullable;
 
 import java.util.Arrays;
 import java.util.List;
+import java.util.function.Function;
+import java.util.function.Supplier;
 
 public enum LanguageType {
-    UNKNOWN(new NotSupportExec(), false, "unknown", ""),
+    UNKNOWN(t -> new NotSupportExec(), false, "unknown", ""),
     JS("js", "javascript"), // initial
     PYTHON("python", "py"), // graalpython
-    RUBY(new NotSupportExec(), false, "ruby"), // truffleruby 実行未確認
-    R(new NotSupportExec(), false, "R", "r"), // fastr 実行未確認
-    LLVM(new LLVMExec(), true, "llvm", "c", "c++", "cpp"), // llvm
-    JAVA(new JavaExec(), true, true, "java") // javassist
+    RUBY(t -> new NotSupportExec(), false, "ruby"), // truffleruby 実行未確認
+    R(t -> new NotSupportExec(), false, "R", "r"), // fastr 実行未確認
+    LLVM(t -> new LLVMExec(), true, "llvm", "c", "c++", "cpp"), // llvm
+    JAVA(t -> new JavaExec(), true, true, "java"),
+    WASM(WASMExec::new, true, "wasm")
     ;
 
     // 実際の実行環境のインストールは下記参照
@@ -30,7 +33,7 @@ public enum LanguageType {
     private final boolean supported;
     private final boolean autoProject;
 
-    LanguageType(@NotNull final IExec exec, boolean autoProject, final String... alias) {
+    LanguageType(@NotNull final Function<LanguageType, IExec> exec, boolean autoProject, final String... alias) {
         this(exec, APIConstants.INSTALLED_LANGUAGES.contains(alias[0]), autoProject, alias);
     }
 
@@ -42,8 +45,8 @@ public enum LanguageType {
         this.autoProject = false;
     }
 
-    LanguageType(@NotNull final IExec exec, boolean supported, boolean autoProject, final String... alias) {
-        this.exec = exec;
+    LanguageType(@NotNull final Function<LanguageType, IExec> exec, boolean supported, boolean autoProject, final String... alias) {
+        this.exec = exec.apply(this);
         this.name = alias[0];
         this.alias = Arrays.asList(alias);
         this.supported = supported;

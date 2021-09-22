@@ -20,7 +20,7 @@ public class ScriptExec extends ContextExec {
     }
 
     @Override
-    public ExecResult exec(@NotNull String code, @NotNull String[] bindData, @NotNull Context context, @NotNull ByteArrayOutputStream contextStream, @Nullable Project project) {
+    public @NotNull ExecResult exec(@NotNull String code, @NotNull String[] bindData, @NotNull Context context, @NotNull ByteArrayOutputStream contextStream, @Nullable Project project) {
         String result = null;
         String error = null;
         final Value global = context.getBindings(languageType.getName());

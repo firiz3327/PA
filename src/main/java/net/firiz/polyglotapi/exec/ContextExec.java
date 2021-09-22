@@ -17,13 +17,14 @@ import java.util.Arrays;
 
 public abstract class ContextExec implements IExec {
 
+    @NotNull
     protected final LanguageType languageType;
 
-    protected ContextExec(LanguageType languageType) {
+    protected ContextExec(@NotNull LanguageType languageType) {
         this.languageType = languageType;
     }
 
-    public PolyglotResult exec(@NotNull String code, @NotNull String[] bindData, @Nullable Project project) {
+    public final @NotNull PolyglotResult exec(@NotNull String code, @NotNull String[] bindData, @Nullable Project project) {
         try (final ByteArrayOutputStream contextStream = new ByteArrayOutputStream();
              final InputStream stdinStream = new ByteArrayInputStream(String.join(System.lineSeparator(), Arrays.asList(bindData)).getBytes(StandardCharsets.UTF_8))) {
             final String returnValue;
@@ -34,18 +35,25 @@ public abstract class ContextExec implements IExec {
                     .err(contextStream)
                     .allowAllAccess(true)
                     .build()) {
-                final ExecResult result = exec(
+                final Object exec = exec(
                         code,
                         bindData,
                         context,
                         contextStream,
                         project
                 );
-                if (result.isException()) {
-                    return PolyglotResult.serverError(languageType, code, result);
+                if (exec instanceof ExecResult) {
+                    final ExecResult result = (ExecResult) exec;
+                    if (result.isException()) {
+                        return PolyglotResult.serverError(languageType, code, result);
+                    } else {
+                        returnValue = result.getReturnValue();
+                        error = result.getError();
+                    }
+                } else if (exec instanceof PolyglotResult) {
+                    return (PolyglotResult) exec;
                 } else {
-                    returnValue = result.getReturnValue();
-                    error = result.getError();
+                    return PolyglotResult.serverError(languageType, code, new RuntimeException("lol error. Please tell the developer that this error has occurred."));
                 }
             } catch (Exception e) {
                 return PolyglotResult.serverError(languageType, code, e);
@@ -56,10 +64,6 @@ public abstract class ContextExec implements IExec {
         }
     }
 
-    abstract ExecResult exec(@NotNull final String code, @NotNull String[] bindData, @NotNull final Context context, @NotNull final ByteArrayOutputStream contextStream, @Nullable Project project);
-
-    protected final ExecResult errorResult(Exception e, ByteArrayOutputStream contextStream) {
-        return new ExecResult(e, contextStream.toString(StandardCharsets.UTF_8), null, e.getLocalizedMessage());
-    }
+    abstract Object exec(@NotNull final String code, @NotNull String[] bindData, @NotNull final Context context, @NotNull final ByteArrayOutputStream contextStream, @Nullable Project project);
 
 }
